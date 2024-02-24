@@ -28,6 +28,13 @@ const cart = () => {
         }, 0)
         return totalItems
     }
+    const totalAmount = () => {
+        const price = items.map((e) => e.qty * e.price);
+        const result = price.reduce((a, b) => {
+            return a + b
+        }, 0)
+        return result
+    }
 
     return (
         <div className="p-5 md:max-w-[50%] mx-auto flex flex-col justify-between h-full">
@@ -42,7 +49,7 @@ const cart = () => {
                                 <th className="min-w-10 border-r">No.</th>
                                 <th className="min-w-26 border-r text-left pl-2">Title</th>
                                 <th className="min-w-26 border-r">Qty</th>
-                                <th className="min-w-26 border-r">Amount</th>
+                                <th className="min-w-26 border-r">Price</th>
                             </tr>
                         </thead>
                         <tbody className="even:bg-slate-100/50">
@@ -56,9 +63,9 @@ const cart = () => {
                             )}
                             <tr className="border bg-orange-200/50 font-bold">
                                 <td className="min-w-10 "></td>
-                                <td className="min-w-26 ">TOTAL</td>
+                                <td className="min-w-26 text-left">TOTAL</td>
                                 <td className="min-w-26 border-r border-y">{totalItems()}</td>
-                                <td className="min-w-26 border-r border-y">{USDollar.format(amount)}</td>
+                                <td className="min-w-26 border-r border-y">{USDollar.format(totalAmount())}</td>
                             </tr>
                         </tbody>
                     </table>
