@@ -28,7 +28,7 @@ const index = () => {
     });
 
     useEffect(() => {
-        fetch(`http://localhost:3001/books/${id}`, {
+        fetch(`http://localhost:4000/books/${id}`, {
             method: 'GET'
         })
             .then((res) => res.json().then((res) => {
@@ -74,11 +74,11 @@ const index = () => {
                 {bookId.map((book) =>
                     <form onSubmit={handleSubmit} key={book._id} className='flex gap-10 flex-col p-5 items-center md:items-start md:flex-row'>
                         <AHelmet>{book.title} : {book.author}</AHelmet>
-                        <Image src={"http://localhost:3001/" + book.fileUrl} alt="" width={400} height={400} className="mb-3" />
+                        <Image src={"http://localhost:4000/" + book.fileUrl} alt="" width={300} height={300} className="mb-3" />
                         <div className='flex flex-col items-center md:items-start'>
-                            <h2 className='text-2xl font-semibold'>{book.title}</h2>
+                            <h2 className='text-2xl font-semibold'>{book.title.toUpperCase()}</h2>
                             <h2>{book.author}</h2>
-                            <p>{USDollar.format(book.price)}</p>
+                            <p className='font-semibold'>{USDollar.format(book.price)}</p>
                             <p className='mt-10 text-center md:text-start'>{book.description}</p>
                             <button className='border bg-slate-300 py-1 px-5 mt-10' onClick={() => sendToCart(book._id)} >Add To Cart</button>
                         </div>

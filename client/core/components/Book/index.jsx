@@ -4,9 +4,9 @@ import { USDollar } from '@/helpers'
 
 const index = ({ url, title, author, price }) => {
     return (
-        <div className="border p-5 bg-slate-100/50 hover:cursor-pointer hover:bg-slate-100">
-            <Image src={"http://localhost:3001/" + url} alt="" width={250} height={300} className="mb-3" />
-            <p className="text-lg font-semibold text-wrap">{title}</p>
+        <div className="border p-5 bg-slate-100/50 hover:cursor-pointer hover:bg-yellow-100">
+            <Image src={"http://localhost:4000/" + url} alt="" width={250} height={300} className="mb-3 object-cover w-[250px] h-[400px]" />
+            <p className="text-lg font-semibold text-wrap">{title.toUpperCase()}</p>
             <p className='text-gray-600'>{author}</p>
             <p className='text-md font-semibold'>{USDollar.format(price)}</p>
 

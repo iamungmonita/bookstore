@@ -1,54 +1,65 @@
 
 import Link from "next/link"
 import { useState } from "react"
-import axios from 'axios'
+
 import { useRouter } from "next/router"
-import { signIn } from "next-auth/react"
+import { EnvelopeIcon, LockClosedIcon } from "@heroicons/react/24/solid"
 const sign_in = () => {
+    const router = useRouter()
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
-    const [errorMsg, setErrorMsg] = useState('')
-
-    const router = useRouter()
-    const handleSubmit = async (e) => {
+    const [passwordError, setPasswordError] = useState('')
+    const [emailError, setEmailError] = useState('')
+    const handleSubmit = (e) => {
         e.preventDefault()
-        const res = await signIn("credentials", {
-            email: email,
-            password: password,
-            redirect: false
-        })
-        router.push('/admin')
+        setEmailError('')
+        setPasswordError('')
+        fetch('http://localhost:4000/auth/admin_login', {
+            method: 'POST',
+            body: JSON.stringify({ email, password }),
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' }
+        }).then((res) => res.json()).then((data) => {
+            if (data.password) {
+                setPasswordError(data.password)
+            }
+            if (data.email) {
+                setEmailError(data.email)
+            }
+            if (data.admin) {
+                router.push('/admin')
+            }
+        }
+        ).catch((err) => console.log(err))
 
     }
     return (
-        <form className='flex flex-col gap-5 border-slate-300 border p-5 w-[450px] mx-auto absolute top-[50%] left-[50%] -translate-x-[50%] -translate-y-[50%]' onSubmit={handleSubmit}>
-            <div className='text-center space-y-5'>
-                <h1 className='text-2xl font-bold'>SIGN IN</h1>
+        <form action=""
+            onSubmit={handleSubmit}
+            className='flex flex-col bg-slate-100 p-5 border min-w-[400px]  top-[50%] left-[50%] absolute -translate-y-[50%] -translate-x-[50%]'>
+            <h2 className='text-2xl text-center font-bold mb-5'>SIGN IN</h2>
+            <div className='flex justify-evenly bg-white items-center border my-3'>
+                <EnvelopeIcon className="h-5 w-20" />
+                <input
+                    className='px-5 w-full py-2 bg-white outline-none border-l'
+                    type="email" name='email'
+                    required
+                    placeholder='email'
+                    onChange={(e) => setEmail(e.target.value)} />
+            </div>
+            <div className='text-sm text-red-700'>{emailError}</div>
 
+            <div className='flex justify-evenly bg-white items-center border my-3'>
+                <LockClosedIcon className='h-5 w-20' />
+                <input
+                    className='px-5 w-full py-2 bg-white outline-none border-l'
+                    required
+                    placeholder='password'
+                    type="password" name='password' onChange={(e) => setPassword(e.target.value)} />
             </div>
-            <div className='flex flex-col gap-5 '>
-                <div className='flex flex-col gap-2'>
-                    <label className="font-semibold" htmlFor="email">Email</label>
-                    <input
-                        type="text"
-                        name='email'
-                        className='bg-slate-200 py-2 px-5 outline-none'
-                        onChange={(e) => setEmail(e.target.value)}
-                    />
-                </div>
-                <div className='flex flex-col gap-2'>
-                    <label className="font-semibold" htmlFor="password">Password</label>
-                    <input
-                        type="password"
-                        name='password'
-                        className='bg-slate-200 py-2 px-5 outline-none'
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
-                </div>
-                <p className='text-red-500'>{errorMsg}</p>
-                <button className='bg-slate-300/50 hover:bg-slate-400 w-full py-2 hover:font-semibold' type='submit'>Submit</button>
-            </div>
-            <Link href={'/'}><h2 className="hover:font-semibold text-center">Forget Password?</h2></Link>
+            <div className='text-sm text-red-700'>{passwordError}</div>
+            <input type="submit" value="Submit" className='bg-slate-300 hover:cursor-pointer py-2 px-5 font-semibold mt-3' />
+            <Link className='bg-yellow-500 text-center hover:cursor-pointer py-2 px-5 font-semibold mt-3' href=' /'>BACK TO HOMEPAGE</Link>
         </form>
     )
 }

@@ -20,11 +20,11 @@ export const useStore = create(
                 return { ...state }
             }),
             increaseItemQty: (index, qty) => set((state) => {
-                { state.items[index].qty += qty }
+                { state.items[index].cartQty += qty }
                 return { ...state }
             }),
             decreaseItemQty: (index, qty) => set((state) => {
-                { state.items[index].qty -= qty }
+                { state.items[index].cartQty -= qty }
                 return { ...state }
             })
         }),

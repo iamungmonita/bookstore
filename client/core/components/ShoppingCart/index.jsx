@@ -42,14 +42,14 @@ const ShoppingCart = ({ togglePopUp, setToggleShoppingCart, setTogglePopUp, remo
     }
 
     const totalItems = () => {
-        const quantity = items.map((e) => e.qty);
+        const quantity = items.map((e) => e.cartQty);
         const result = quantity.reduce((a, b) => {
             return a + b
         }, 0)
         return result
     }
     const totalAmount = () => {
-        const price = items.map((e) => e.qty * e.price);
+        const price = items.map((e) => e.cartQty * e.price);
         const result = price.reduce((a, b) => {
             return a + b
         }, 0)
@@ -60,14 +60,14 @@ const ShoppingCart = ({ togglePopUp, setToggleShoppingCart, setTogglePopUp, remo
         router.push(`/${path}`)
     }
 
-    useEffect(() => { }, [refresh])
+    useEffect(() => { }, [refresh, items])
 
     return (
         <div className='flex flex-col justify-between h-full'>
             <div>
                 <div className="flex justify-between items-center">
                     <h2 className="text-xl font-semibold">Shopping Cart</h2>
-                    <XMarkIcon className="h-7 w-7" onClick={() => setToggleShoppingCart(false)} />
+                    <XMarkIcon className="h-7 w-7 cursor-pointer" onClick={() => setToggleShoppingCart(false)} />
                 </div>
                 {
                     items.length > 0 &&
@@ -83,13 +83,10 @@ const ShoppingCart = ({ togglePopUp, setToggleShoppingCart, setTogglePopUp, remo
                                         <h2>{USDollar.format(item.price)}</h2>
                                         <div className='flex items-center w-20 justify-between'>
                                             <MinusIcon className='w-4 h-4 font-semibold text-slate-600' onClick={() => handleDecreaseItemQty(index, 1)} />
-                                            {item.qty}
+                                            {(item.cartQty)}
                                             <PlusIcon className='w-4 h-4 font-semibold text-slate-600' onClick={() => handleIncreaseItemQty(index, 1)} />
                                         </div>
-
-
                                     </div>
-
                                 </div>
                                 <TrashIcon className="w-4 h-4 text-red-500 ml-3" onClick={() => handleDelete(index)} />
                             </div>
@@ -112,10 +109,10 @@ const ShoppingCart = ({ togglePopUp, setToggleShoppingCart, setTogglePopUp, remo
             <div>
                 <h2 className="text-lg font-semibold mt-10">Total Items: {totalItems()}</h2>
                 <h2 className="text-lg font-semibold">Subtotal: {USDollar.format(totalAmount())}</h2>
-                <button className='bg-slate-200 py-2 px-5 w-full mt-5 hover:font-semibold' onClick={() => redirectPath('/cart')} disabled={items.length === 0}>
+                <button className='bg-slate-200 py-2 px-5 w-full mt-5 hover:font-semibold' onClick={() => redirectPath('/cart')}>
                     CHECKOUT
                 </button>
-                <button className='w-full p-2 bg-slate-100 mt-5 hover:font-semibold' disabled={items.length === 0}
+                <button className={`w-full p-2 ${items.length === 0 ? 'bg-slate-50 text-slate-300' : 'bg-slate-100 text-black'} mt-5 hover:font-semibold`} disabled={items.length === 0}
                     onClick={() => setTogglePopUp(true)}>REMOVE ALL ITEMS</button>
             </div>
         </div>
