@@ -2,12 +2,13 @@ import React, { useEffect, useRef, useState } from 'react'
 import axios from 'axios'
 import Image from 'next/image'
 import { useRouter } from 'next/router'
-import { USDollar } from '@/helpers'
+import { USDollar, outsideClick } from '@/helpers'
 import { constAuthorId } from '@/constant/authorId'
 import { getBooks, getAuthors } from '@/services'
 import useApi from '@/useApi'
-import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/solid'
+import { ChevronDownIcon, ChevronUpIcon, XMarkIcon } from '@heroicons/react/24/solid'
 import { Dropdown, InputText } from '@/core/components'
+import { constCategoryId } from '@/constant/categoryId'
 
 const admin = () => {
     const [file, setFile] = useState(null)
@@ -17,6 +18,7 @@ const admin = () => {
     const [page, setPage] = useState()
     const [qty, setQty] = useState()
     const [cartQty, setCartQty] = useState(1)
+    const [category, setCategory] = useState()
     const [categoryId, setCategoryId] = useState()
     const [price, setPrice] = useState()
     const [description, setDescription] = useState()
@@ -26,7 +28,10 @@ const admin = () => {
     const [bookList, setBookList] = useState([])
     const [adminUsername, setAdminUsername] = useState('')
     const router = useRouter()
+    const adminRef = useRef()
 
+
+    const [openForm, setOpenForm] = useState(false)
     const handleLogout = () => {
         fetch('http://localhost:4000/auth/admin_logout', {
             method: 'GET',
@@ -38,18 +43,18 @@ const admin = () => {
         }).catch((err) => console.log(err))
     }
 
+
     const handleSubmit = (e) => {
         e.preventDefault()
         if (file) {
             const formData = new FormData()
             formData.append('file', file)
-            fetch('http://localhost:4000/upload-file', {
+            fetch('http://localhost:4000/upload-cover', {
                 method: 'POST',
                 body: formData
             })
                 .then((response) => response.json()).then(async (res) => {
                     const fileUrl = res.message
-
                     fetch('http://localhost:4000/check-book', {
                         method: 'POST',
                         headers: {
@@ -91,11 +96,12 @@ const admin = () => {
                                     "Content-Type": "application/json",
                                 },
                             }).then((res) => res.json()).then(() => {
+
                                 setRefresh(!refresh)
+
                             }).catch(err => console.log(err))
                         }
                     })
-
                 })
         }
     }
@@ -114,6 +120,7 @@ const admin = () => {
             }
         }).catch(err => console.log(err))
     }, [])
+
     const bookPromise = () => Promise.resolve(getBooks())
     const authorPromise = () => Promise.resolve(getAuthors())
     const [authors, setAuthors] = useState([])
@@ -122,101 +129,73 @@ const admin = () => {
 
     useEffect(() => { setBookList(response), setAuthors(authorsList) }, [response, authorsList, refresh])
 
-    const sendFunction = (id) => {
-        setAuthorId(id)
-        setAuthor()
-    }
-
 
     return (
         <>
             <div className='flex justify-end items-center mt-5 px-5'>
                 <p className='py-1 px-5'><span className='font-semibold'>Admin: </span>{adminUsername}</p>
-                <button className='py-1 px-5 border font-semibold bg-yellow-500 rounded-md' onClick={handleLogout}>Sign Out</button>
+                <button className='py-1 px-5 border hover:font-semibold bg-slate-200' onClick={handleLogout}>Sign Out</button>
             </div>
-            <div className='flex flex-col w-full items-start justify-between gap-5 md:flex-row'>
-                <form className='p-5 flex-col flex gap-3 mt-10 border-b border-t min-w-[90%] mx-auto md:min-w-[50%] border bg-slate-50' onSubmit={handleSubmit}>
-                    <h2 className='font-bold text-xl text-center mb-5'>Add New Book</h2>
-                    <div className='flex items-center justify-around gap-5 lg:flex-row flex-col'>
-                        <div className='flex flex-col gap-5 w-full '>
-                            <div className='grid grid-cols-2 gap-5'>
-                                <InputText
-                                    label='Title'
-                                    type="text"
-                                    handleChange={(value) => { setTitle(value) }}
-                                />
-                                {/* <div className='flex gap-3 justify-between items-center'>
-                                <label htmlFor="title" className='font-semibold'>Title</label>
-                                <input onChange={(e) => setTitle(e.target.value)} type="text" name='title'
-                                    className='py-2 px-5 border outline-none rounded-md' />
-                            </div> */}
-                                <Dropdown
-                                    items={authors}
-                                    label="Author"
-                                    sendFunction={(id, name) => { setAuthorId(id), setAuthor(name) }} />
-                            </div>
-                            {/* <div className='flex gap-5 justify-between items-center'>
-                                <label htmlFor="author" className='font-semibold'>Author</label>
-                                <div className='relative w-full bg-red-200 py-2 px-5 border rounded-md'>
-                                    <p
-                                        className='flex items-center justify-between'
-                                        onClick={() => setDropdown(!dropdown)}>{!author ? 'Select Author' : author}
-                                        <span>{!dropdown ? <ChevronDownIcon className='w-5 h-5' /> : <ChevronUpIcon className='w-5 h-5' />} </span></p>
-                                    <div className='absolute left-0 top-[100%] w-full border bg-slate-100 rounded-md'>
-                                        {dropdown && authors.length &&
-                                            authors.map((author) =>
-                                                <div
-                                                    className='hover:bg-white py-2 px-5 w-full bg-slate-100 rounded-md'
-                                                    onClick={() => sendAuthorId(author._id, author.name)}>{author.name}</div>)
-                                        }
+            <div className='flex flex-col w-full items-start justify-between gap-5 md:flex-row' ref={adminRef}>
+                {openForm &&
+                    <div className='bg-black/80 w-screen h-screen  overflow-scroll fixed top-0 left-0'>
+                        <form className='p-10 flex-col flex relative gap-3 mt-10 border-b border-t max-w-[90%] mx-auto md:w-[60%] border bg-slate-100' onSubmit={handleSubmit}>
+                            <XMarkIcon className='h-7 w-7 bg-slate-200 hover:cursor-pointer absolute top-5 right-5' onClick={() => setOpenForm(!openForm)} />
+                            <div className='flex items-center justify-around gap-5 lg:flex-row flex-col'>
+                                <div className='flex flex-col gap-5 w-full '>
+                                    <div className='grid grid-cols-2 gap-5'>
+                                        <InputText
+                                            label='Title'
+                                            type="text"
+                                            handleChange={(value) => { setTitle(value) }}
+                                        />
+                                        <Dropdown
+                                            items={authors}
+                                            label="Author"
+                                            sendFunction={(id, name) => { setAuthorId(id), setAuthor(name) }} />
+                                    </div>
+                                    <div className='flex flex-col gap-5 justify-between'>
+                                        <label htmlFor="description" className='font-semibold'>Description</label>
+                                        <textarea onChange={(e) => setDescription(e.target.value)} name='description'
+                                            className='py-2 px-5 border w-full outline-none rounded-md' />
+                                    </div>
+                                    <div className='grid grid-cols-2 gap-5'>
+                                        <InputText
+                                            label='Page'
+                                            type="number"
+                                            handleChange={(value) => setPage(value)}
+                                        />
+                                        <InputText
+                                            label='Qty'
+                                            type="qty"
+                                            handleChange={(value) => setQty(value)}
+                                        />
+                                    </div>
+                                    <div className='grid grid-cols-2 gap-5'>
+                                        <Dropdown
+                                            items={constCategoryId}
+                                            label="CategoryId"
+                                            sendFunction={(id, name) => { setCategoryId(id), setCategory(name) }} />
+
+                                        <InputText
+                                            label='Price'
+                                            type="number"
+                                            handleChange={(value) => setPrice(value)}
+                                        />
+                                    </div>
+
+                                    <div className='flex flex-col gap-5 justify-between w-full'>
+                                        <label htmlFor="price" className='font-semibold'>Cover</label>
+                                        <input type="file" name='image' accept='image/*' onChange={(e) => setFile(e.target.files[0])}
+                                            className='py-2 px-5 border bg-white outline-none rounded-md' />
                                     </div>
                                 </div>
-                            </div> */}
-                            {/* <InputText
-                                label='Description'
-                                type="text"
-                                handleChange={(value) => setDescription(value)}
-                            /> */}
-                            <div className='flex flex-col gap-5 justify-between'>
-                                <label htmlFor="description" className='font-semibold'>Description</label>
-                                <textarea onChange={(e) => setDescription(e.target.value)} name='description'
-                                    className='py-2 px-5 border w-full outline-none rounded-md' />
                             </div>
-                            <div className='grid grid-cols-2 gap-5'>
-                                <InputText
-                                    label='Page'
-                                    type="number"
-                                    handleChange={(value) => setPage(value)}
-                                />
-                                <InputText
-                                    label='Qty'
-                                    type="qty"
-                                    handleChange={(value) => setQty(value)}
-                                />
-                            </div>
-                            <div className='grid grid-cols-2 gap-5'>
-                                <InputText
-                                    label='CategoryId'
-                                    type="number"
-                                    handleChange={(value) => setCategoryId(value)}
-                                />
-                                <InputText
-                                    label='Price'
-                                    type="number"
-                                    handleChange={(value) => setPrice(value)}
-                                />
-                            </div>
-
-                            <div className='flex flex-col gap-5 justify-between w-full'>
-                                <label htmlFor="price" className='font-semibold'>Cover</label>
-                                <input type="file" name='image' accept='image/*' onChange={(e) => setFile(e.target.files[0])}
-                                    className='py-2 px-5 border bg-white outline-none rounded-md' />
-                            </div>
-                        </div>
+                            <button type='submit' className='font-semibold bg-slate-300 p-3 mt-5 rounded-md'>Add</button>
+                        </form >
                     </div>
-                    <button type='submit' className='font-semibold bg-yellow-500 p-3 mt-5 rounded-md'>Add</button>
-                </form >
-                <div className='max-w-[90%] mx-auto md:min-w-[40%] mt-10 '>
+                }
+                <div className='w-full mt-10 p-5 md:p-0'>
                     <table className='text-center w-full'>
                         <thead>
                             <tr className='bg-slate-200'>
@@ -240,8 +219,10 @@ const admin = () => {
                             </tbody>
                         }
                     </table>
+                    <button onClick={() => setOpenForm(true)} className='hover:font-semibold py-1 max-w-[30%] border px-5 bg-slate-200 mx-auto float-right mt-10'
+                    >Add New Book</button>
                 </div>
-            </div >
+            </div>
 
         </>
     )

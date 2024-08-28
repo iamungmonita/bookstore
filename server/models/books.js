@@ -5,15 +5,34 @@ const BookSchema = new mongoose.Schema({
         type: String,
         trim: true,
         lowercase: true,
+        required: [true, 'title is required']
     },
-    author: String,
+    author: {
+        type: String,
+        required: [true, 'author is required']
+    },
     authorId: String,
-    page: Number,
-    price: Number,
-    description: String,
+    page: {
+        type: Number,
+        required: [true, 'page is required']
+    },
+    price: {
+        type: Number,
+        required: [true, 'price is required']
+    },
+    description: {
+        type: String,
+        required: [true, 'description is required']
+    },
     fileUrl: String,
-    categoryId: Number,
-    qty: Number,
+    categoryId: {
+        type: String,
+        required: [true, 'categoryId is required']
+    },
+    qty: {
+        type: Number,
+        required: [true, 'qty is required']
+    },
     cartQty: Number,
 })
 

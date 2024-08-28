@@ -1,11 +1,13 @@
 
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/router"
-import { AHelmet, Book, NavBar } from "@/core/components"
+import { AHelmet, Book, Dropdown, NavBar } from "@/core/components"
 import { Footer } from "@/core/layout"
 import { ArrowDownIcon, ChevronDownIcon } from "@heroicons/react/24/solid"
 import { getAuthors } from "@/services"
+
 import useApi from "@/useApi"
+import { constCategoryId } from "@/constant/categoryId"
 const home = () => {
   const [books, setBooks] = useState([])
   const [refresh, setRefresh] = useState(false)
@@ -14,6 +16,7 @@ const home = () => {
   const { response } = useApi({ service: promiseAuthor(), effect: [] })
   const [authors, setAuthors] = useState([])
   const [authorName, setAuthorName] = useState('')
+  const [category, setCategory] = useState()
 
 
 
@@ -38,6 +41,13 @@ const home = () => {
       .then((data) => setBooks(data))
     setDropdown(false)
   }
+  const filterBookByCategory = (id, name) => {
+    setCategory(name)
+    fetch(`http://localhost:4000/books?categoryId=${id}`, { method: 'GET' })
+      .then((res) => res.json())
+      .then((data) => setBooks(data))
+    setDropdown(false)
+  }
   const filterRef = useRef()
   const outsideClick = (e) => {
     if (filterRef.current && !filterRef.current.contains(e.target)) {
@@ -56,15 +66,18 @@ const home = () => {
       <NavBar />
       <div className="flex items-center gap-5 ml-5 mt-5 relative  hover:cursor-pointer" ref={filterRef}>
         <p className="font-semibold">Sort By:</p>
-        <div onClick={() => setDropdown(!dropdown)}
-          className="flex items-center border w-48 relative justify-between py-1  px-2">{authorName ? authorName : 'Author'} <span><ChevronDownIcon
-            className="w-5 h-5" /></span>
-          <div className=" absolute top-[100%] right-0">
-            {dropdown && authors.map((author) =>
-              <p className="bg-slate-100 py-1 px-2 w-48 ml-5 hover:bg-white"
-                onClick={() => filterBookByAuthor(author._id, author.name)}
-                key={author._id}>{author.name}</p>)}
-          </div>
+        <div className="flex items-center border w-48 ">
+
+          <Dropdown
+            items={authors}
+            label=""
+            sendFunction={(id, name) => { filterBookByAuthor(id, name) }} />
+        </div>
+        <div className="flex items-center border w-48">
+          <Dropdown
+            items={constCategoryId}
+            label=""
+            sendFunction={(id, name) => { filterBookByCategory(id, name) }} />
         </div>
       </div>
       <div className="flex items-center gap-5 p-5 flex-wrap flex-col sm:flex-row">

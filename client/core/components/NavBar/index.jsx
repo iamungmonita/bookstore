@@ -13,12 +13,11 @@ import useApi from '@/useApi'
 
 
 const NavBar = () => {
-    const [refresh, setRefresh] = useState(false)
+    const router = useRouter()
     const [toggle, setToggle] = useState(false)
     const [toggleShoppingCart, setToggleShoppingCart] = useState(false)
     const [toggleSearchBar, setToggleSearchBar] = useState(false)
     const [togglePopUp, setTogglePopUp] = useState(false)
-    const [showBook, setShowBook] = useState(false)
     const sidebarRef = useRef()
     const items = useGetState(useStore, (state) => state.items) ?? [];
     const [books, setBooks] = useState([])
@@ -46,7 +45,7 @@ const NavBar = () => {
         setTogglePopUp(!togglePopUp)
         setToggleShoppingCart(!toggleShoppingCart)
     }
-    useEffect(() => { setToggle(false) }, [toggleShoppingCart])
+
     const handleOutsideClick = (e) => {
         if (sidebarRef.current && !sidebarRef.current.contains(e.target)) {
             setToggleShoppingCart(false)
@@ -54,13 +53,18 @@ const NavBar = () => {
             setToggleSearchBar(false)
         }
     }
+
+    useEffect(() => {
+        setToggle(false)
+    }, [toggleShoppingCart])
+
     useEffect(() => {
         document.addEventListener('click', handleOutsideClick)
         return () => {
             document.removeEventListener('click', handleOutsideClick)
         }
     }, [])
-    const router = useRouter()
+
     const selectBook = (id) => {
         router.push(`/books/${id}`)
         setToggleSearchBar(false)
